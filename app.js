@@ -55,13 +55,13 @@ var Excel = React.createClass({
     },
 
     _save: function(e) {
-      e.preventDefault();
-      var data = this.state.data.slice();
-      data[this.state.edit.row][this.state.edit.col] = e.target.firstChild.value;
-      this.setState({
-        data: data,
-        edit: null
-      });
+        e.preventDefault();
+        var data = this.state.data.slice();
+        data[this.state.edit.row][this.state.edit.col] = e.target.firstChild.value;
+        this.setState({
+            data: data,
+            edit: null
+        });
     },
 
     render: function() {
@@ -93,7 +93,13 @@ var Excel = React.createClass({
                 }, row.map(function(cell, idx) {
                     var content = cell;
                     if ((edit && edit.row == rowIdx && edit.col == idx)) {
-                      content = React.DOM.form({onSubmit: _save, action:''}, React.DOM.input({type: 'text', defaultValue: content, }) );
+                        content = React.DOM.form({
+                            onSubmit: _save,
+                            action: ''
+                        }, React.DOM.input({
+                            type: 'text',
+                            defaultValue: content,
+                        }));
                     }
                     return React.DOM.td({
                         'data-row': rowIdx,
