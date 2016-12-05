@@ -1,3 +1,4 @@
+#Chapter3
 var headers = ["Book", "Author", "Language", "Published", "Sales"];
 var data = [
   ['book3', 'author1', 'lang1', 'pub1', 'sales1'],
