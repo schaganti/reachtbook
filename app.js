@@ -26,7 +26,17 @@ var Excel = React.createClass({
             data: this.props.initalData,
             descending: true,
             sortby: null,
+            edit: null,
         };
+    },
+
+    _edit: function(e) {
+        this.setState({
+            edit: {
+                row: e.target.dataset.row,
+                col: e.target.cellIndex
+            }
+        });
     },
 
     _sort: function(e) {
@@ -44,10 +54,23 @@ var Excel = React.createClass({
 
     },
 
+    _save: function(e) {
+      e.preventDefault();
+      var data = this.state.data.slice();
+      data[this.state.edit.row][this.state.edit.col] = e.target.firstChild.value;
+      this.setState({
+        data: data,
+        edit: null
+      });
+    },
+
     render: function() {
 
         var sortby = this.state.sortby;
         var descending = this.state.descending;
+        var edit = this.state.edit;
+        //This variable needed to be added here so it can be referred in the function to handle edit usecase.
+        var _save = this._save;
 
         return React.DOM.table(null,
             React.DOM.thead({
@@ -62,13 +85,20 @@ var Excel = React.createClass({
                             key: idx
                         }, title);
                     }))),
-            React.DOM.tbody(null, this.state.data.map(function(row, idx) {
+            React.DOM.tbody({
+                onDoubleClick: this._edit
+            }, this.state.data.map(function(row, rowIdx) {
                 return React.DOM.tr({
-                    key: idx
+                    key: rowIdx
                 }, row.map(function(cell, idx) {
+                    var content = cell;
+                    if ((edit && edit.row == rowIdx && edit.col == idx)) {
+                      content = React.DOM.form({onSubmit: _save, action:''}, React.DOM.input({type: 'text', defaultValue: content, }) );
+                    }
                     return React.DOM.td({
-                        key: idx
-                    }, cell);
+                        'data-row': rowIdx,
+                        key: idx,
+                    }, content);
                 }));
             }))
         );
