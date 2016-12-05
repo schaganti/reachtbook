@@ -1,4 +1,4 @@
-#Chapter3
+//Chapter3
 var headers = ["Book", "Author", "Language", "Published", "Sales"];
 var data = [
   ['book3', 'author1', 'lang1', 'pub1', 'sales1'],
@@ -11,6 +11,8 @@ var Excel = React.createClass({
   displayName: 'excel',
 
   _preSearchData: null,
+
+  _log: [],
 
   propTypes: {
     headers: React.PropTypes.arrayOf(
@@ -34,8 +36,37 @@ var Excel = React.createClass({
     };
   },
 
+  _logSetState: function(newState) {
+    this._log.push(JSON.parse(JSON.stringify(this._log.length == 0 ? this.state: newState)));
+    this.setState(newState);
+  },
+
+  _replay: function() {
+    if(this._log.length == 0) {
+      console.log('nothing to replay');
+      return;
+    }
+    var idx = -1;
+    var inter = setInterval(function () {
+      idx++;
+      if(idx === this._log.length -1) {
+        clearInterval(inter);
+      }
+      this.setState(this._log[idx]);
+    }.bind(this), 1000);
+
+  },
+
+  componentDidMount: function() {
+    document.onkeydown = function(e) {
+      if(e.altKey && e.shiftKey && e.keyCode == 82) {
+        this._replay();
+      }
+    }.bind(this);
+  },
+
   _edit: function(e) {
-    this.setState({
+    this._logSetState({
       edit: {
         row: e.target.dataset.row,
         col: e.target.cellIndex
@@ -50,7 +81,7 @@ var Excel = React.createClass({
     data.sort(function(row1, row2) {
       return descending ? (row1[column] > row2[column] ? 1 : -1) : (row1[column] > row2[column] ? -1 : 1);
     });
-    this.setState({
+    this._logSetState({
       data: data,
       descending: descending,
       sortby: column
@@ -62,7 +93,7 @@ var Excel = React.createClass({
     e.preventDefault();
     var data = this.state.data.slice();
     data[this.state.edit.row][this.state.edit.col] = e.target.firstChild.value;
-    this.setState({
+    this._logSetState({
       data: data,
       edit: null
     });
@@ -71,14 +102,14 @@ var Excel = React.createClass({
   _toggleSearch: function() {
 
     if (this.state.search) {
-      this.setState({
+      this._logSetState({
         search: false,
         data: this._preSearchData,
       });
       this._preSearchData = null;
     } else {
       this._preSearchData = this.state.data;
-      this.setState({
+      this._logSetState({
         search: true,
       });
     }
@@ -87,11 +118,11 @@ var Excel = React.createClass({
   _search: function(e) {
     var needle = e.target.value.toLowerCase();
     if (!needle) {
-      this.setState({
+      this._logSetState({
         data: this._preSearchData,
       });
     } else {
-      this.setState({
+      this._logSetState({
         data: this._preSearchData.filter(function(row) {
           return row[e.target.dataset.idx].toString().toLowerCase().indexOf(needle) > -1;
         })
